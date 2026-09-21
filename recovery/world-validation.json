@@ -1,0 +1,11 @@
+{
+  "assertions": {
+    "gameplay": 65,
+    "controls": 44,
+    "world": 41
+  },
+  "failures": 0,
+  "headset_validation": "synthetic only",
+  "archive_bytes": 88667828,
+  "sha256": "804c3b36b6789f144d5826d603af0186bb75b5817446e781cc0e82721d4a0392"
+}

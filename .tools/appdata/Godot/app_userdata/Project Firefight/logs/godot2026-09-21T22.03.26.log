@@ -1,0 +1,23 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+SPAWN city (0.0, 0.1, 0.0)
+TRUCK city size=(3.059388, 4.4306, 10.56955) frame=[X: (0.999976, 0.0, -0.006982), Y: (0.0, 1.0, 0.0), Z: (0.006982, 0.0, 0.999976), O: (1.61007, 2.2753, -14.10611)]
+CONE MeshInstance3D (80.0, 80.0, 90.0) mesh=[P: (-0.003304, -0.003304, -0.005314), S: (0.006609, 0.006609, 0.0053)] children=[CollisionSource_U97:<MeshInstance3D#58770589166>, U114_Attachepoint:<Node3D#58787366373>, U97_Pylon_col:<StaticBody3D#58820920799>]
+PLACED bounds=[P: (-7.324358, 0.001219, -2.484358), S: (0.528716, 0.477, 0.528716)] transform=[X: (80.0, 0.0, 0.0), Y: (0.0, 0.0, 80.0), Z: (0.0, -90.0, 0.0), O: (-7.06, 0.0, -2.22)]
+ERROR: Placed cone collision is enabled
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/test_world.gd:12)
+       [1] run (res://scripts/test_world.gd:74)
+CONE MeshInstance3D (80.0, 80.0, 90.0) mesh=[P: (-0.003304, -0.003304, -0.005314), S: (0.006609, 0.006609, 0.0053)] children=[CollisionSource_U97:<MeshInstance3D#58938362442>, U114_Attachepoint:<Node3D#58955138536>, _MeshInstance3D_96_col:<StaticBody3D#58988692973>]
+PLACED bounds=[P: (-7.324358, 0.001219, 2.415642), S: (0.528716, 0.477, 0.528716)] transform=[X: (80.0, 0.0, 0.0), Y: (0.0, 0.0, 80.0), Z: (0.0, -90.0, 0.0), O: (-7.06, 0.0, 2.68)]
+ERROR: Placed cone collision is enabled
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/test_world.gd:12)
+       [1] run (res://scripts/test_world.gd:74)
+SPAWN forest (0.840002, -0.36, -25.15)
+TRUCK forest size=(3.047007, 4.43031, 10.56882) frame=[X: (-0.799128, 0.0, -0.60116), Y: (0.0, 1.0, 0.0), Z: (0.60116, 0.0, -0.799128), O: (-4.970536, 1.505155, -18.42293)]
+WORLD TESTS: 41 assertions, 2 failures

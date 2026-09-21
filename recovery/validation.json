@@ -1,0 +1,17 @@
+{
+  "archive": "GodotProject.zip",
+  "sha256": "e1fc5119b123391ba39f7e7208dea6dea65e468fd0be84103e3a0b1ab663ba52",
+  "bytes": 88472401,
+  "gameplay_assertions": 65,
+  "gameplay_failures": 0,
+  "engine": "4.7.1",
+  "render_previews": [
+    "city-preview.png",
+    "forest-preview.png",
+    "menu-preview.png"
+  ],
+  "clean_package_import": true,
+  "clean_package_gameplay_assertions": 65,
+  "clean_package_gameplay_failures": 0,
+  "environment_warning": "Godot could not read the OS root certificate store under the restricted environment; offline import, rendering and gameplay tests passed."
+}

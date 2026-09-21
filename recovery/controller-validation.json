@@ -1,0 +1,10 @@
+{
+  "archive": "GodotProject.zip",
+  "sha256": "e6664001ac22fd3031f3a475db30f34684c8589707882b887a892e05563ff656",
+  "gameplay_assertions": 65,
+  "controller_assertions": 44,
+  "failures": 0,
+  "xr_validation": "Synthetic trackers only; physical headset not tested",
+  "menu": "Controls -> Maps",
+  "language": "English only"
+}

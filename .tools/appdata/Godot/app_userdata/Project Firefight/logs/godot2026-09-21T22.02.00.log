@@ -1,0 +1,16 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+BAKED city objects=247
+Pump (1.643528, 1.590364, -9.120052)
+JetPipe (6.98, 0.08, -8.84)
+Ground (0.0, 0.0, 0.0)
+XR Rig (0.0, 0.0, 0.0)
+Main Camera (0.0, 0.0, 0.0)
+BAKED forest objects=259
+Pump (-1.977, 0.822, -22.411)
+JetPipe (7.021722, -0.747, -24.37374)
+ForestLand (0.0, -3.19, -10.0)
+XR Rig (0.840002, -0.46, -25.15)
+Main Camera (0.840002, -0.46, -25.15)
