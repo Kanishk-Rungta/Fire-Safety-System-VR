@@ -1,6 +1,7 @@
 extends Node3D
 
 const Network = preload("res://scripts/water_network.gd")
+const HoseCollision = preload("res://scripts/hose_collision.gd")
 const Player = preload("res://scripts/player.gd")
 const VRPlayer = preload("res://scripts/vr_player.gd")
 const VRPanel = preload("res://scripts/vr_panel.gd")
@@ -351,7 +352,13 @@ func setup_equipment() -> void:
 			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			line.material_override = mat
 			world.add_child(line)
-			hoses.append({"mesh":line,"a":component_node(rid(d.connections[0])),"b":component_node(rid(d.connections[1])),"radius":[0.06,0.045,0.035][int(d.hoseType)]})
+			var solid := StaticBody3D.new()
+			solid.name = "HoseSolid"
+			solid.collision_layer = 4
+			solid.collision_mask = 2
+			world.add_child(solid)
+			hoses.append({"mesh":line,"body":solid,"a":component_node(rid(d.connections[0])),"b":component_node(rid(d.connections[1])),"radius":[0.06,0.045,0.035][int(d.hoseType)]})
+	for hose in hoses: draw_hose(hose)
 	# The pylon mesh is a prefab in sharedassets1, outside the scene's hierarchy.
 	if level == "city" and ResourceLoader.exists("res://assets/equipment.glb"):
 		if is_instance_valid(pylon_template): pylon_template.free()
@@ -439,26 +446,38 @@ func message(text: String) -> void:
 
 func setup_spray() -> void:
 	spray = CPUParticles3D.new()
-	spray.amount = 600
-	spray.lifetime = 0.75
+	spray.amount = 1400
+	spray.lifetime = 1.1
 	spray.direction = Vector3(0, 0, -1)
-	spray.spread = 3.0
-	spray.initial_velocity_min = 17.0
-	spray.initial_velocity_max = 21.0
-	spray.gravity = Vector3(0, -3.5, 0)
-	spray.scale_amount_min = 0.025
-	spray.scale_amount_max = 0.05
-	spray.mesh = SphereMesh.new()
+	spray.spread = 4.0
+	spray.initial_velocity_min = 30.0
+	spray.initial_velocity_max = 34.0
+	spray.gravity = Vector3(0, -1.5, 0)
+	spray.scale_amount_min = 0.7
+	spray.scale_amount_max = 1.3
+	var droplet := SphereMesh.new()
+	droplet.radius = 0.045
+	droplet.height = 0.09
+	droplet.radial_segments = 6
+	droplet.rings = 3
+	spray.mesh = droplet
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0.95))
+	fade.add_point(0.75, Color(1, 1, 1, 0.8))
+	fade.set_color(1, Color(1, 1, 1, 0))
+	spray.color_ramp = fade
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.7, 0.9, 1.0, 0.7)
+	mat.albedo_color = Color(0.65, 0.88, 1.0, 0.9)
+	mat.vertex_color_use_as_albedo = true
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	spray.material_override = mat
 	spray.emitting = false
 	spray.local_coords = false
+	spray.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var emitter: Node3D = player.right if control_mode == "vr" else player.camera
 	emitter.add_child(spray)
-	spray.position = Vector3(0, 0, -0.15) if control_mode == "vr" else Vector3(0.25, -0.2, -0.65)
+	spray.position = Vector3(0, 0, -0.25) if control_mode == "vr" else Vector3(0.35, -0.35, -1.6)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if control_mode != "keyboard" or level.is_empty(): return
@@ -579,7 +598,9 @@ func drop_item() -> void:
 	var from: Vector3 = ray.origin
 	var to: Vector3 = from - ray.basis.z * 3.0
 	var hit := get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, 1))
-	place_item(hit.position + Vector3.UP * 0.05 if not hit.is_empty() else to)
+	var destination: Vector3 = hit.position + hit.normal * 0.2 if not hit.is_empty() else to
+	HoseCollision.move_held(grabbed, destination)
+	place_item(grabbed.global_position)
 
 func place_item(location: Vector3) -> void:
 	if not is_instance_valid(grabbed): return
@@ -637,15 +658,17 @@ func join_connection() -> void:
 		return
 	for a in candidates:
 		if network.connect_ports(a, b):
+			var holding_nozzle := is_instance_valid(grabbed) and grabbed == component_node(nozzle_id)
 			var source := component_node(a)
 			var destination := component_node(b)
-			if is_instance_valid(grabbed):
+			if is_instance_valid(grabbed) and not holding_nozzle:
 				grabbed.global_position += destination.global_position - source.global_position
 				set_collision(grabbed, true)
 			event_for(rid(components[a].data.m_GameObject))
 			event_for(rid(components[b].data.m_GameObject))
-			grabbed = null
-			grabbed_go = ""
+			if not holding_nozzle:
+				grabbed = null
+				grabbed_go = ""
 			selected_port = ""
 			message("Connected. Open the appropriate valves to supply water.")
 			return
@@ -698,11 +721,11 @@ func _process(delta: float) -> void:
 	if is_instance_valid(grabbed):
 		if control_mode == "vr":
 			if player.grip.get_has_tracking_data():
-				grabbed.global_position = player.grip.global_position
+				HoseCollision.move_held(grabbed, player.grip.global_position)
 				grabbed.global_basis = Basis(player.grip.global_basis.get_rotation_quaternion() * grabbed_rotation_offset).scaled(grabbed.global_basis.get_scale())
 		else:
 			var camera: Camera3D = player.camera
-			grabbed.global_position = camera.global_position - camera.global_basis.z * 1.3 + camera.global_basis.x * 0.35 - camera.global_basis.y * 0.35
+			HoseCollision.move_held(grabbed, camera.global_position - camera.global_basis.z * 1.3 + camera.global_basis.x * 0.35 - camera.global_basis.y * 0.35)
 	for a in network.links:
 		var b: String = network.links[a]
 		if components[a].script == "HoseConnectionController" and components[b].script != "HoseConnectionController":
@@ -714,8 +737,8 @@ func _process(delta: float) -> void:
 	elif aimed.get("kind", "") in ["valve", "hydrant"]: prompt.text += "  [Trigger Use]" if control_mode == "vr" else "  [R Use]"
 	elif not aimed.is_empty(): prompt.text += "  [Grip Pick up]" if control_mode == "vr" else "  [E Pick up]"
 	var pressure: float = network.nozzle_pressure(nozzle_id) if not nozzle_id.is_empty() else 0.0
-	spraying = is_instance_valid(grabbed) and grabbed == component_node(nozzle_id) and (player.trigger_down() if control_mode == "vr" else Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) and pressure > 0.5
-	spray.emitting = spraying
+	var trigger: bool = player.trigger_down() if control_mode == "vr" else Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	update_spray(pressure, trigger)
 	if spraying:
 		if not water_audio.playing: water_audio.play()
 		apply_water(delta)
@@ -754,16 +777,32 @@ func update_objective_marker() -> void:
 	objective_marker.position = Vector2(clampf(screen.x - 120.0, 15.0, 1025.0), clampf(screen.y, 160.0, 535.0))
 	objective_marker.text = "▼  %.1f m" % camera.global_position.distance_to(point)
 
+func spray_reach(pressure: float) -> float:
+	return lerpf(14.0, 34.0, clampf((pressure - 0.5) / 7.0, 0.0, 1.0))
+
+func update_spray(pressure: float, trigger: bool) -> void:
+	var holding_nozzle := is_instance_valid(grabbed) and grabbed == component_node(nozzle_id)
+	spraying = not paused and holding_nozzle and trigger and pressure > 0.5
+	if spraying:
+		var reach := spray_reach(pressure)
+		spray.initial_velocity_min = reach / spray.lifetime * 0.92
+		spray.initial_velocity_max = reach / spray.lifetime
+	if holding_nozzle and trigger and pressure <= 0.5:
+		message("No water pressure: connect the supply hose and open the source, pump and connected distributor valves.")
+	spray.emitting = spraying
+
 func apply_water(delta: float) -> void:
 	var ray := aim_transform()
 	var origin: Vector3 = ray.origin
 	var direction: Vector3 = -ray.basis.z
-	var hit := get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(origin, origin + direction * 18.0, 1))
-	var max_distance := 18.0 if hit.is_empty() else origin.distance_to(hit.position) + 0.6
+	var reach := spray_reach(network.nozzle_pressure(nozzle_id))
+	var hit := get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(origin, origin + direction * reach, 1))
+	var max_distance := reach if hit.is_empty() else origin.distance_to(hit.position) + 0.6
 	for fire in fires.values():
 		var offset: Vector3 = fire.global_position + Vector3.UP - origin
 		var along := offset.dot(direction)
-		if along > 0 and along < max_distance and (offset - direction * along).length() < 1.3:
+		var radius := 0.45 + along * tan(deg_to_rad(spray.spread))
+		if along > 0 and along < max_distance and (offset - direction * along).length() < radius:
 			# Desktop stream samples replace Unity particle collision event counts.
 			fire.extinguish(2400.0 * delta)
 
@@ -772,15 +811,21 @@ func draw_hose(hose: Dictionary) -> void:
 	mesh.clear_surfaces()
 	var a: Vector3 = hose.a.global_position
 	var b: Vector3 = hose.b.global_position
-	if a.distance_to(b) < 0.001: return
+	if a.distance_to(b) < 0.001:
+		HoseCollision.update_body(hose.body, [], hose.radius)
+		return
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
 	var points: Array[Vector3] = []
-	for i in range(13):
-		var t := float(i) / 12.0
-		var p := a.lerp(b, t)
-		p.y -= sin(t * PI) * minf(0.35, a.distance_to(b) * 0.03)
-		points.append(p)
-	for i in range(12):
+	var route := HoseCollision.route(a, b, world.get_node("FiretruckSolid"), hose.radius)
+	for segment in range(route.size() - 1):
+		for i in range(12):
+			var t := float(i) / 12.0
+			var p := route[segment].lerp(route[segment + 1], t)
+			p.y -= sin(t * PI) * minf(0.35, route[segment].distance_to(route[segment + 1]) * 0.03)
+			points.append(p)
+	points.append(b)
+	HoseCollision.update_body(hose.body, points, hose.radius)
+	for i in range(points.size() - 1):
 		var axis: Vector3 = (points[i + 1] - points[i]).normalized()
 		var right := axis.cross(Vector3.UP).normalized()
 		if right.length() < 0.1: right = Vector3.RIGHT

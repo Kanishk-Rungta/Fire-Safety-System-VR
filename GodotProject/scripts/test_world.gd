@@ -25,11 +25,67 @@ func run() -> void:
 		check(truck.global_basis.get_scale().is_equal_approx(Vector3.ONE), level + " truck collider has unit scale")
 		var shape: BoxShape3D = truck.get_child(0).shape
 		check(shape.size.x < 4.0 and shape.size.z > 8.0, level + " truck hull follows the vehicle orientation")
+		var pipe_start := truck.to_global(Vector3(-shape.size.x / 2 - 1, 0, 0))
+		var pipe_finish := truck.to_global(Vector3(shape.size.x / 2 + 1, 0, 0))
+		var pipe := Node3D.new()
+		root.add_child(pipe)
+		pipe.global_position = pipe_start
+		game.HoseCollision.move_held(pipe, pipe_finish)
+		check(truck.to_local(pipe.global_position).x < -shape.size.x / 2, level + " held pipe cannot tunnel through truck")
+		pipe.free()
+		var route: Array[Vector3] = game.HoseCollision.route(pipe_start, pipe_finish, truck, 0.06)
+		check(route.size() > 2, level + " hose routes around truck")
+		var truck_bounds := AABB(-shape.size / 2, shape.size)
+		# Actual pump couplings can sit inside the truck's simplified box hull.
+		# Connect a hose and drag its free end to each side of the vehicle.
+		for id in game.components:
+			var component: Dictionary = game.components[id]
+			if component.get("script", "") != "PumpController": continue
+			var ports: Array = component.data.outputConnections.duplicate()
+			ports.append(component.data.inputConnection)
+			for port in ports:
+				var port_id: String = game.rid(port)
+				var outlet: Vector3 = game.component_node(port_id).global_position
+				for hose in game.hoses:
+					var hose_port := ""
+					for candidate in game.network.ports:
+						if game.component_node(candidate) == hose.a and int(game.network.ports[candidate].connectionSize) == int(game.network.ports[port_id].connectionSize):
+							hose_port = candidate
+							break
+					if hose_port.is_empty(): continue
+					var original_a: Vector3 = hose.a.global_position
+					var original_b: Vector3 = hose.b.global_position
+					check(game.network.connect_ports(hose_port, port_id), level + " attach hose to actual truck coupling")
+					hose.a.global_position = outlet
+					for side in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
+						hose.b.global_position = truck.to_global(side * 10.0)
+						game.draw_hose(hose)
+						var attached_route: Array[Vector3] = game.HoseCollision.route(outlet, hose.b.global_position, truck, hose.radius)
+						check(attached_route[0].is_equal_approx(outlet), level + " hose stays attached at coupling")
+						for segment in range(attached_route.size() - 1):
+							if segment == 0 and truck_bounds.has_point(truck.to_local(outlet)): continue
+							check(truck_bounds.intersects_segment(truck.to_local(attached_route[segment]), truck.to_local(attached_route[segment + 1])) == null, level + " connected hose clears truck toward " + str(side))
+					game.network.disconnect_port(hose_port)
+					hose.a.global_position = original_a
+					hose.b.global_position = original_b
+					game.draw_hose(hose)
+					break
+		for i in range(route.size() - 1):
+			check(truck_bounds.intersects_segment(truck.to_local(route[i]), truck.to_local(route[i + 1])) == null, level + " routed segment clears truck")
+		var test_hose := StaticBody3D.new()
+		test_hose.collision_layer = 4
+		root.add_child(test_hose)
+		var pipe_points: Array[Vector3] = [Vector3(-2, 100.7, 0), Vector3(2, 100.7, 0)]
+		game.HoseCollision.update_body(test_hose, pipe_points, 0.06)
+		await physics_frame
 		for script in ["player", "vr_player"]:
 			var walker: CharacterBody3D = load("res://scripts/" + script + ".gd").new()
 			root.add_child(walker)
 			walker.set_physics_process(false)
 			await physics_frame
+			walker.global_position = Vector3(0, 100, 2)
+			var pipe_hit := walker.move_and_collide(Vector3(0, 0, -4))
+			check(pipe_hit != null and pipe_hit.get_collider() == test_hose, level + " " + script + " cannot walk through hose")
 			for side in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
 				var half: float = shape.size.x / 2 if side.x else shape.size.z / 2
 				var local_start: Vector3 = side * (half + 1.0) + Vector3(0, -shape.size.y / 2 + 0.08, 0)
@@ -38,6 +94,7 @@ func run() -> void:
 				var hit := walker.move_and_collide(motion)
 				check(hit != null and hit.get_collider() == truck, level + " " + script + " blocked by truck from " + str(side))
 			walker.free()
+		test_hose.free()
 		# A player can still stand outside the rear and use the pump.
 		var pump_id := "213" if level == "city" else "231"
 		var pump: Node3D = game.nodes[pump_id]

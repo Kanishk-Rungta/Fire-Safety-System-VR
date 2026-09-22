@@ -13,7 +13,7 @@ var turn_latched := false
 
 func _ready() -> void:
 	collision_layer = 2
-	collision_mask = 1
+	collision_mask = 5
 	var shape := CollisionShape3D.new()
 	shape.name = "BodyCollision"
 	var capsule := CapsuleShape3D.new()

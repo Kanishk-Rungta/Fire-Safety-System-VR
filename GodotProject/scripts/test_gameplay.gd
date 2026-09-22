@@ -32,10 +32,39 @@ func run() -> void:
 		else: forest()
 		check(game.progress == (26 if level == "city" else 22), level + " tutorial reaches fire suppression")
 		check(game.network.nozzle_pressure(game.nozzle_id) > 0.5, level + " nozzle supplied")
+		var nozzle_port: String = game.rid(game.components[game.nozzle_id].data.inputConnection)
+		var hose_port: String = game.network.links[nozzle_port]
+		game.network.disconnect_port(nozzle_port)
+		join(nozzle_port, hose_port)
+		check(game.grabbed == game.component_node(game.nozzle_id), level + " connecting held nozzle keeps it in hand")
+		game.update_spray(game.network.nozzle_pressure(game.nozzle_id), true)
+		check(game.spraying and game.spray.emitting, level + " supplied held nozzle emits water on trigger")
+		check(game.spray_reach(game.network.nozzle_pressure(game.nozzle_id)) > 30.0, level + " full pressure reaches over 30 metres")
+		game.update_spray(0.0, true)
+		check(not game.spray.emitting and game.notice.text.begins_with("No water pressure"), level + " missing supply explains blocked spray")
+		game.update_spray(8.0, false)
+		check(not game.spray.emitting, level + " release stops water")
+		game.paused = true
+		game.update_spray(8.0, true)
+		check(not game.spray.emitting, level + " pause stops water")
+		game.paused = false
 		var patch = game.fires.values()[0]
 		patch.ignite()
 		patch.tick(2.0)
 		check(patch.hp > 199.0, "Fire grows using recovered rule")
+		var camera_pose: Transform3D = game.player.camera.global_transform
+		var patch_position: Vector3 = patch.global_position
+		game.player.camera.global_transform = Transform3D(Basis.IDENTITY, Vector3(0, 100, 0))
+		patch.global_position = Vector3(1.5, 99, -28)
+		var previous_hp: float = patch.hp
+		game.apply_water(0.02)
+		check(patch.hp < previous_hp, level + " long spray suppresses a fire inside its spread at 28 metres")
+		patch.global_position = Vector3(8, 99, -28)
+		previous_hp = patch.hp
+		game.apply_water(0.02)
+		check(is_equal_approx(patch.hp, previous_hp), level + " fire outside spray spread stays dry")
+		game.player.camera.global_transform = camera_pose
+		patch.global_position = patch_position
 		patch.extinguish(100000.0)
 		check(patch.put_out and not patch.burning, "Water extinguishes a fire")
 		for fire in game.fires.values(): fire.extinguish(100000.0)
