@@ -1,0 +1,137 @@
+[gd_resource type="OpenXRActionMap" load_steps=29 format=3]
+
+[sub_resource type="OpenXRAction" id="Action_aim"]
+resource_name = "aim"
+localized_name = "Aim"
+action_type = 3
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_grip"]
+resource_name = "grip"
+localized_name = "Grip"
+action_type = 3
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_trigger"]
+resource_name = "trigger"
+localized_name = "Trigger"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_grab"]
+resource_name = "grab"
+localized_name = "Grab"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_primary"]
+resource_name = "primary"
+localized_name = "Primary"
+action_type = 2
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_connect"]
+resource_name = "connect"
+localized_name = "Connect"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_secondary"]
+resource_name = "secondary"
+localized_name = "Secondary"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_disconnect"]
+resource_name = "disconnect"
+localized_name = "Disconnect"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left", "/user/hand/right")
+
+[sub_resource type="OpenXRAction" id="Action_menu"]
+resource_name = "menu"
+localized_name = "Menu"
+action_type = 0
+toplevel_paths = PackedStringArray("/user/hand/left")
+
+[sub_resource type="OpenXRActionSet" id="ActionSet_game"]
+resource_name = "game"
+localized_name = "Firefight"
+priority = 0
+actions = Array[OpenXRAction]([SubResource("Action_aim"), SubResource("Action_grip"), SubResource("Action_trigger"), SubResource("Action_grab"), SubResource("Action_primary"), SubResource("Action_connect"), SubResource("Action_secondary"), SubResource("Action_disconnect"), SubResource("Action_menu")])
+
+[sub_resource type="OpenXRIPBinding" id="Binding_0"]
+action = SubResource("Action_aim")
+binding_path = "/user/hand/left/input/aim/pose"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_1"]
+action = SubResource("Action_grip")
+binding_path = "/user/hand/left/input/grip/pose"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_2"]
+action = SubResource("Action_trigger")
+binding_path = "/user/hand/left/input/trigger/value"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_3"]
+action = SubResource("Action_grab")
+binding_path = "/user/hand/left/input/squeeze/value"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_4"]
+action = SubResource("Action_primary")
+binding_path = "/user/hand/left/input/thumbstick"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_5"]
+action = SubResource("Action_connect")
+binding_path = "/user/hand/left/input/x/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_6"]
+action = SubResource("Action_secondary")
+binding_path = "/user/hand/left/input/y/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_7"]
+action = SubResource("Action_disconnect")
+binding_path = "/user/hand/left/input/thumbstick/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_8"]
+action = SubResource("Action_aim")
+binding_path = "/user/hand/right/input/aim/pose"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_9"]
+action = SubResource("Action_grip")
+binding_path = "/user/hand/right/input/grip/pose"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_10"]
+action = SubResource("Action_trigger")
+binding_path = "/user/hand/right/input/trigger/value"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_11"]
+action = SubResource("Action_grab")
+binding_path = "/user/hand/right/input/squeeze/value"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_12"]
+action = SubResource("Action_primary")
+binding_path = "/user/hand/right/input/thumbstick"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_13"]
+action = SubResource("Action_connect")
+binding_path = "/user/hand/right/input/a/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_14"]
+action = SubResource("Action_secondary")
+binding_path = "/user/hand/right/input/b/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_15"]
+action = SubResource("Action_disconnect")
+binding_path = "/user/hand/right/input/thumbstick/click"
+
+[sub_resource type="OpenXRIPBinding" id="Binding_16"]
+action = SubResource("Action_menu")
+binding_path = "/user/hand/left/input/menu/click"
+
+[sub_resource type="OpenXRInteractionProfile" id="Profile_touch"]
+interaction_profile_path = "/interaction_profiles/oculus/touch_controller"
+bindings = Array[OpenXRIPBinding]([SubResource("Binding_0"), SubResource("Binding_1"), SubResource("Binding_2"), SubResource("Binding_3"), SubResource("Binding_4"), SubResource("Binding_5"), SubResource("Binding_6"), SubResource("Binding_7"), SubResource("Binding_8"), SubResource("Binding_9"), SubResource("Binding_10"), SubResource("Binding_11"), SubResource("Binding_12"), SubResource("Binding_13"), SubResource("Binding_14"), SubResource("Binding_15"), SubResource("Binding_16")])
+
+[resource]
+action_sets = Array[OpenXRActionSet]([SubResource("ActionSet_game")])
+interaction_profiles = Array[OpenXRInteractionProfile]([SubResource("Profile_touch")])

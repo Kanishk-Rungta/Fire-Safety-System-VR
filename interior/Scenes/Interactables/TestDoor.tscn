@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_hinge.tscn" id="1_hinge"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_handle.tscn" id="2_handle"]
+[ext_resource type="Script" path="res://interior/Scripts/Interactables/DoorInteract.gd" id="3_door_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_door"]
+size = Vector3(1, 2, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_door"]
+size = Vector3(1, 2, 0.1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_handle"]
+radius = 0.1
+
+[sub_resource type="SphereMesh" id="SphereMesh_handle"]
+radius = 0.1
+height = 0.2
+
+[node name="TestDoor" type="Node3D"]
+script = ExtResource("3_door_script")
+
+[node name="InteractableHinge" type="Node3D" parent="."]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="InteractableHinge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, 0)
+collision_layer = 3
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableHinge/StaticBody3D"]
+shape = SubResource("BoxShape3D_door")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InteractableHinge/StaticBody3D"]
+mesh = SubResource("BoxMesh_door")
+
+[node name="HandleBody" type="StaticBody3D" parent="InteractableHinge"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1, 0.1)
+collision_layer = 3
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableHinge/HandleBody"]
+shape = SubResource("SphereShape3D_handle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InteractableHinge/HandleBody"]
+mesh = SubResource("SphereMesh_handle")

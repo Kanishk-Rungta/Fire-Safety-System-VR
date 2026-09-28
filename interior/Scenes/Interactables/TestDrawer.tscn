@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_slider.tscn" id="1_slider"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/interactables/interactable_handle.tscn" id="2_handle"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_drawer"]
+size = Vector3(0.5, 0.2, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_drawer"]
+size = Vector3(0.5, 0.2, 0.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_handle"]
+radius = 0.05
+
+[node name="TestDrawer" type="Node3D"]
+
+[node name="InteractableSlider" parent="." instance=ExtResource("1_slider")]
+slider_limit_max = 0.4
+
+[node name="AnimatableBody3D" type="AnimatableBody3D" parent="InteractableSlider"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableSlider/AnimatableBody3D"]
+shape = SubResource("BoxShape3D_drawer")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InteractableSlider/AnimatableBody3D"]
+mesh = SubResource("BoxMesh_drawer")
+
+[node name="InteractableHandle" parent="InteractableSlider" instance=ExtResource("2_handle")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableSlider/InteractableHandle"]
+shape = SubResource("SphereShape3D_handle")

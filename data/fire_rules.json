@@ -1,0 +1,18 @@
+{
+  "m_GameObject": {
+    "m_FileID": 0,
+    "m_PathID": 0
+  },
+  "m_Enabled": 1,
+  "m_Script": {
+    "m_FileID": 16777216,
+    "m_PathID": 11559501824
+  },
+  "m_Name": "FireRulesVariables",
+  "particleDamage": 0.44999998807907104,
+  "fireUpperBorder": 10000.0,
+  "fireLowerBorder": 0.0,
+  "fireMultiplicator": 100.0,
+  "maxSmokeParticles": 30,
+  "maxSparkParticles": 20
+}

@@ -1,0 +1,53 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://interior/Scripts/Player/DesktopPlayer.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://interior/Scenes/UI/OxygenHUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://interior/Scenes/UI/MissionHUD.tscn" id="3_mission"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.25
+height = 1.75
+
+[sub_resource type="SphereMesh" id="SphereMesh_crosshair"]
+radius = 0.003
+height = 0.006
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 1048576
+collision_mask = 7
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+
+[node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
+target_position = Vector3(0, 0, -5)
+collision_mask = 7
+
+; Torch — SpotLight3D, warm amber cone. Toggled ON/OFF with F key.
+[node name="Torch" type="SpotLight3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.2)
+light_color = Color(1.0, 0.85, 0.55, 1)
+light_energy = 0.0
+shadow_enabled = true
+spot_range = 18.0
+spot_attenuation = 0.6
+spot_angle = 22.0
+spot_angle_attenuation = 0.8
+
+[node name="Crosshair" type="MeshInstance3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+mesh = SubResource("SphereMesh_crosshair")
+
+[node name="CeilingCheck" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+target_position = Vector3(0, 1.0, 0)
+collision_mask = 1
+
+[node name="OxygenHUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="MissionHUD" parent="." instance=ExtResource("3_mission")]

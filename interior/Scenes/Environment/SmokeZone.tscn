@@ -1,0 +1,58 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://interior/Scripts/Environment/SmokeZone.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_smoke"]
+size = Vector3(14.5, 1.6, 11)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vol"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.12, 0.1, 0.09, 0.42)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vol"]
+material = SubResource("StandardMaterial3D_vol")
+size = Vector3(14.5, 1.6, 11)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pcloud"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.18, 0.16, 0.15, 0.25)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_pcloud"]
+material = SubResource("StandardMaterial3D_pcloud")
+size = Vector2(1.5, 1.5)
+
+[node name="SmokeZone" type="Area3D" groups=["smoke_zone"]]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("1_script")
+lower_bound_y = 1.25
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+shape = SubResource("BoxShape3D_smoke")
+
+[node name="SmokeMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+mesh = SubResource("BoxMesh_vol")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+amount = 45
+lifetime = 3.0
+mesh = SubResource("QuadMesh_pcloud")
+emission_shape = 3
+emission_box_extents = Vector3(6.8, 0.6, 5.2)
+direction = Vector3(0, 0, 0)
+spread = 180.0
+gravity = Vector3(0, -0.04, 0)
+initial_velocity_min = 0.05
+initial_velocity_max = 0.25
+scale_amount_min = 1.2
+scale_amount_max = 2.5
+color = Color(0.2, 0.18, 0.16, 0.3)

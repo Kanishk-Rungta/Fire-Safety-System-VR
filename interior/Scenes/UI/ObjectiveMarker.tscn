@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://interior/Scripts/UI/ObjectiveMarker.gd" id="1_marker"]
+
+[sub_resource type="StandardMaterial3D" id="mat_beacon"]
+albedo_color = Color(1.0, 0.85, 0.2, 1)
+emission_enabled = true
+emission = Color(1.0, 0.85, 0.2, 1)
+emission_energy_multiplier = 2.5
+billboard_mode = 1
+
+[sub_resource type="SphereMesh" id="mesh_beacon"]
+material = SubResource("mat_beacon")
+radius = 0.12
+height = 0.24
+
+; Label3D font — uses built-in, no ext_resource needed
+[sub_resource type="StandardMaterial3D" id="mat_label_bg"]
+albedo_color = Color(0.05, 0.05, 0.05, 0.7)
+transparency = 1
+billboard_mode = 1
+
+[node name="ObjectiveMarker" type="Node3D"]
+script = ExtResource("1_marker")
+
+; The glowing sphere
+[node name="BeaconMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("mesh_beacon")
+cast_shadow = 0
+
+; Pulsing orange light
+[node name="BeaconLight" type="OmniLight3D" parent="."]
+light_color = Color(1.0, 0.85, 0.2, 1)
+light_energy = 1.5
+omni_range = 4.0
+shadow_enabled = false
+
+; Distance label — billboard so it always faces camera
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+billboard = 1
+text = "▼"
+font_size = 48
+modulate = Color(1.0, 0.85, 0.2, 1.0)
+outline_size = 6
+outline_modulate = Color(0, 0, 0, 0.8)
+double_sided = true
+no_depth_test = true
